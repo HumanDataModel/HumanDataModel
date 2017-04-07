@@ -1,0 +1,159 @@
+<!DOCTYPE HTML>
+<html lang="">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta content="text/html; charset=utf-8" http-equiv="Content-Type" />
+    <title></title>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="description" content="" />
+    <meta name="HandheldFriendly" content="true" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+
+    <link rel="icon" type="image/png" sizes="96x96" href="assets/graphics/exports/PCS_logo_fav.png">
+
+    <link rel="stylesheet" href="assets/style.css">
+
+</head>
+
+<script src="libs/d3.min.js"></script>
+<script src="libs/jquery-3.1.1.min.js"></script>
+
+<script src="libs/socket.io.min.js"></script>
+
+<script data-main="HumanDataModel" src="libs/require.js"></script>
+
+<span class="pcs-logo">
+    <img src="assets/graphics/exports/PCS_logo.png" /><span class="pcs-logo-text"></span>
+</span>
+
+
+<!-- Devices Graph -->
+<script src="scripts/graph.js"></script>
+<style>
+    .node {
+        stroke: #fff;
+        stroke-width: 1.5px;
+        z-index: 10;
+    }
+    
+    .link {
+        stroke: #999;
+        stroke-opacity: .6;
+    }
+</style>
+
+<div id="thegraph" class="userDeviceProximityGraph">
+</div>
+
+
+<!-- Google Maps -->
+<div id="googleMap"></div>
+
+<script src="https://maps.googleapis.com/maps/api/js"></script>
+<script>
+    // Subscribe the GPS coordinates from the model
+    $('#googleMap').hide();
+
+    function updatedLocation(lat, long) {
+        var myCenter = new google.maps.LatLng(lat, long);
+
+        function initialize() {
+            var mapProp = {
+                center: myCenter,
+                zoom: 15,
+                scrollwheel: false,
+                draggable: false,
+                disableDefaultUI: true,
+
+                mapTypeId: google.maps.MapTypeId.ROADMAP
+            };
+
+            var map = new google.maps.Map(document.getElementById("googleMap"), mapProp);
+
+            var marker = new google.maps.Marker({
+                position: myCenter,
+            });
+
+            marker.setMap(map);
+        }
+
+        initialize();
+    };
+
+
+
+    // Wait for a little while for the hd to get initialized
+    var currentLocationMD5 = '';
+    setTimeout(function () {
+
+        hdModel.addCallbackForEvent('location', function (event) {
+            if (currentLocationMD5 !== event.md5 &&
+                hdModel.model.location.latitude && hdModel.model.location.longitude) {
+
+                log('old: ' + currentLocationMD5 + ' vs. ' + event.md5);
+                currentLocationMD5 = event.md5;
+
+
+                $('#googleMap').fadeIn();
+
+                updatedLocation(
+                    hdModel.model.location.latitude,
+                    hdModel.model.location.longitude
+                );
+
+            } else {
+
+                $('#googleMap').fadeOut(5000);
+            }
+        });
+
+
+    }, 1000);
+</script>
+
+
+<script>
+    setTimeout(function () {
+        log('ProximityGraph');
+
+
+        var currentSocialGraphMD5 = '';
+        hdModel.addCallbackForEvent('social_proximity_set', function (event) {
+            log('UPDATE GRAPH');
+
+            if (currentSocialGraphMD5 !== event.md5 && hdModel.model.proxemicDevices) {
+                currentSocialGraphMD5 = event.md5;
+
+                $('#thegraph').fadeIn();
+
+                updateProximityGraph('alice', 'iphone', Object.keys(
+                    hdModel.model.proxemicDevices));
+
+            } else {
+
+                $('#thegraph').fadeOut(5000);
+            }
+        });
+
+
+    }, 1000);
+</script>
+
+
+
+<script>
+    var config = {
+        name: "Human Data model"
+    };
+
+    $(document).ready(function () {
+        document.title = config.name;
+        $('.pcs-logo-text').text(config.name);
+    });
+</script>
+
+
+</html>
