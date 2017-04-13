@@ -47,12 +47,12 @@ var HumanDataModel = function () {
     var inputListeners = {};
 
     // PHASE 2
-    var eventUpdateTimes = {};
-    var eventGenerators = {};
-    var dataToEventsMappings = {};
+    var sensationUpdateTimes = {};
+    var sensationGenerators = {};
+    var dataToSensationsMappings = {};
 
     // PHASE 3
-    var eventCallbacks = {
+    var sensationCallbacks = {
         local: {}
     };
 
@@ -95,11 +95,11 @@ var HumanDataModel = function () {
 
     // PHASE 2
 
-    that.addEventGenerator = function (eventType, triggeringInputDataTypes, maxInterval, validTime, generatorMethod) {
-        log('Event generator for: ' + eventType);
+    that.addSensationGenerator = function (sensationType, triggeringInputDataTypes, maxInterval, validTime, generatorMethod) {
+        log('Sensation generator for: ' + sensationType);
 
         // name: when last called, function to call, maxInterval (how often can be invoked)
-        eventGenerators[eventType] = {
+        sensationGenerators[sensationType] = {
             lastCalled: null,
             generator: generatorMethod,
             maxInterval: maxInterval,
@@ -112,27 +112,27 @@ var HumanDataModel = function () {
             inputDataType;
         for (index in triggeringInputDataTypes) {
             inputDataType = triggeringInputDataTypes[index];
-            if (!dataToEventsMappings[inputDataType]) {
-                dataToEventsMappings[inputDataType] = [];
+            if (!dataToSensationsMappings[inputDataType]) {
+                dataToSensationsMappings[inputDataType] = [];
             }
-            dataToEventsMappings[inputDataType].push(eventType);
+            dataToSensationsMappings[inputDataType].push(sensationType);
         }
 
-        log(dataToEventsMappings);
+        log(dataToSensationsMappings);
     };
 
 
     // PHASE 3
 
-    that.addCallbackForEvent = function (eventName, callback) {
-        log('Call back for event: ' + eventName);
+    that.addCallbackForSensation = function (sensationName, callback) {
+        log('Call back for sensation: ' + sensationName);
 
-        if (!eventGenerators[eventName]) {
-            throw "Cannot add callback: Unknown event type: " + eventName;
+        if (!sensationGenerators[sensationName]) {
+            throw "Cannot add callback: Unknown sensation type: " + sensationName;
         }
 
         // For direct/local subsribers
-        eventCallbacks['local'][eventName] = callback;
+        sensationCallbacks['local'][sensationName] = callback;
 
     };
 
@@ -158,36 +158,36 @@ var HumanDataModel = function () {
                 log('Handling data for key: ' + dataType);
                 inputListeners[dataType](model, inputData[dataType]);
 
-                // invoke the event generators
+                // invoke the sensation generators
 
                 var j,
                     key,
-                    eventGeneratorKeys = dataToEventsMappings[dataType];
-                log(eventGeneratorKeys);
-                for (j = 0; j < eventGeneratorKeys.length; j += 1) {
-                    key = eventGeneratorKeys[j];
-                    var generatorInfo = eventGenerators[key];
+                    sensationGeneratorKeys = dataToSensationsMappings[dataType];
+                log(sensationGeneratorKeys);
+                for (j = 0; j < sensationGeneratorKeys.length; j += 1) {
+                    key = sensationGeneratorKeys[j];
+                    var generatorInfo = sensationGenerators[key];
 
 
                     // TODO: check the interval
 
 
                     // invoke method
-                    var eventToPublish = generatorInfo.generator(model);
-                    //model[key] = eventToPublish.eventValue;
-                    eventUpdateTimes[key] = Date.now();
+                    var sensationToPublish = generatorInfo.generator(model);
+                    //model[key] = sensationToPublish.sensationValue;
+                    sensationUpdateTimes[key] = Date.now();
 
                     // publish to local
-                    var localCallbackForEvent = eventCallbacks['local'][key];
-                    if (!localCallbackForEvent) {
+                    var localCallbackForSensation = sensationCallbacks['local'][key];
+                    if (!localCallbackForSensation) {
                         return;
                     }
 
-                    // Add the md5 so that the client can decide if it reacts to the event
-                    var oldMD5 = getHashForEventType(key);
-                    eventToPublish.md5 = oldMD5;
+                    // Add the md5 so that the client can decide if it reacts to the sensation
+                    var oldMD5 = getHashForSensationType(key);
+                    sensationToPublish.md5 = oldMD5;
 
-                    localCallbackForEvent(eventToPublish);
+                    localCallbackForSensation(sensationToPublish);
 
 
                     // TODO: publish for global subscribers
@@ -196,17 +196,17 @@ var HumanDataModel = function () {
                     // check for validity
 
                     setTimeout(function () {
-                        var newMD5 = getHashForEventType(key);
-                        if (eventUpdateTimes[key] && newMD5 === oldMD5) {
+                        var newMD5 = getHashForSensationType(key);
+                        if (sensationUpdateTimes[key] && newMD5 === oldMD5) {
                             log('SAME VALUE TOO LONG for ' + key + ' (' + generatorInfo.validTime + '): ' + oldMD5 + ' vs. ' + newMD5);
                             model[key] = {};
-                            var eventToPublish = {
-                                eventType: key,
-                                eventValue: model[key],
+                            var sensationToPublish = {
+                                sensationType: key,
+                                sensationValue: model[key],
                                 md5: newMD5
                             };
 
-                            localCallbackForEvent(eventToPublish);
+                            localCallbackForSensation(sensationToPublish);
                         }
                     }, generatorInfo.validTime * 1000);
 
@@ -215,7 +215,7 @@ var HumanDataModel = function () {
 
             }
 
-            // TODO: check data type (HD_event_types define also the input data)
+            // TODO: check data type (HD_sensation_types define also the input data)
 
             // TODO: merge to the model
         }
@@ -261,9 +261,9 @@ var HumanDataModel = function () {
     }
 
 
-    function getHashForEventType(eventType) {
-        var datadataJsonString = model[eventType] ? JSON.stringify(model[eventType]) : '';
-        var lastUpdateTime = eventUpdateTimes[eventType];
+    function getHashForSensationType(sensationType) {
+        var datadataJsonString = model[sensationType] ? JSON.stringify(model[sensationType]) : '';
+        var lastUpdateTime = sensationUpdateTimes[sensationType];
         return md5(datadataJsonString + lastUpdateTime);
     }
 
@@ -398,17 +398,17 @@ hdModel.addInputListener('gps_coordinates', function (theModel, coordinates) {
 
 
 
-// hd event type (name), array of inputs that trigger the generator, 
+// hd sensation type (name), array of inputs that trigger the generator, 
 // interval in seconds (how fast/often the generator can be called), and 
-// value indicating how long the event is valid
-hdModel.addEventGenerator('social_proximity_set', ['ble_devices', 'facebook_friends'], 3, 5, function (theModel) {
+// value indicating how long the sensation is valid
+hdModel.addSensationGenerator('social_proximity_set', ['ble_devices', 'facebook_friends'], 3, 5, function (theModel) {
 
     // the the fb data
     console.log('SOCIAL PROXIMITY GRAPH CHANGED EVENT');
 
-    var event = {
-        eventType: 'social_proximity_set',
-        eventValue: {
+    var sensation = {
+        sensationType: 'social_proximity_set',
+        sensationValue: {
             friends: {}
         }
     };
@@ -418,27 +418,27 @@ hdModel.addEventGenerator('social_proximity_set', ['ble_devices', 'facebook_frie
         if (theModel.proxemicUsers.hasOwnProperty(user)) {
             log('friend: ' + user);
             if (Object.keys(theModel.facebookFriends).indexOf(user) !== -1) {
-                event.eventValue.friends[user] = theModel.facebookFriends[user];
+                sensation.sensationValue.friends[user] = theModel.facebookFriends[user];
             }
         }
     }
 
-    log(event);
+    log(sensation);
 
-    return event;
+    return sensation;
 });
 
 
-// hd event type (name), array of inputs that trigger the generator, 
+// hd sensation type (name), array of inputs that trigger the generator, 
 // interval in seconds (how fast/often the generator can be called), and 
-// value indicating how long the event is valid
-hdModel.addEventGenerator('location', ['gps_coordinates'], 3, 10, function (theModel) {
+// value indicating how long the sensation is valid
+hdModel.addSensationGenerator('location', ['gps_coordinates'], 3, 10, function (theModel) {
 
-    // Generate location output events
+    // Generate location output sensations
 
-    var event = {
-        eventType: 'location',
-        eventValue: {
+    var sensation = {
+        sensationType: 'location',
+        sensationValue: {
             location: {
                 latitude: theModel.location.latitude,
                 longitude: theModel.location.longitude
@@ -446,7 +446,7 @@ hdModel.addEventGenerator('location', ['gps_coordinates'], 3, 10, function (theM
         }
     };
 
-    return event;
+    return sensation;
 });
 
 

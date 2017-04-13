@@ -327,16 +327,16 @@ function dooStuff(username, deviceName, graph) {
 
     // listen changes in proximityDevice and update graph accordingly
 
-    function update(event) {
+    function update(sensation) {
 
 
 
-        if (event.eventType == 'proximityDevices') {
+        if (sensation.sensationType == 'proximityDevices') {
 
             var currentDeviceIds = [];
-            for (j in event.eventValue) {
-                var pDevId = event.eventValue[j][0];
-                var pDevDistance = event.eventValue[j][1];
+            for (j in sensation.sensationValue) {
+                var pDevId = sensation.sensationValue[j][0];
+                var pDevDistance = sensation.sensationValue[j][1];
                 currentDeviceIds.push(pDevId);
 
                 // check if the node already exists

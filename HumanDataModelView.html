@@ -89,12 +89,12 @@
     var currentLocationMD5 = '';
     setTimeout(function () {
 
-        hdModel.addCallbackForEvent('location', function (event) {
-            if (currentLocationMD5 !== event.md5 &&
+        hdModel.addCallbackForSensation('location', function (sensation) {
+            if (currentLocationMD5 !== sensation.md5 &&
                 hdModel.model.location.latitude && hdModel.model.location.longitude) {
 
-                log('old: ' + currentLocationMD5 + ' vs. ' + event.md5);
-                currentLocationMD5 = event.md5;
+                log('old: ' + currentLocationMD5 + ' vs. ' + sensation.md5);
+                currentLocationMD5 = sensation.md5;
 
 
                 $('#googleMap').fadeIn();
@@ -121,11 +121,11 @@
 
 
         var currentSocialGraphMD5 = '';
-        hdModel.addCallbackForEvent('social_proximity_set', function (event) {
+        hdModel.addCallbackForSensation('social_proximity_set', function (sensation) {
             log('UPDATE GRAPH');
 
-            if (currentSocialGraphMD5 !== event.md5 && hdModel.model.proxemicDevices) {
-                currentSocialGraphMD5 = event.md5;
+            if (currentSocialGraphMD5 !== sensation.md5 && hdModel.model.proxemicDevices) {
+                currentSocialGraphMD5 = sensation.md5;
 
                 $('#thegraph').fadeIn();
 

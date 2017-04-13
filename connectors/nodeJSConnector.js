@@ -48,9 +48,9 @@ var initializeConnector = function (hdModel) {
 
         socket.emit('identify', hdModel.model.identity);
 
-        hdModel.addDispatcher(function (eventName, identity, eventData) {
+        hdModel.addDispatcher(function (sensationName, identity, sensationData) {
             log('sending seed');
-            socket.emit(eventName, identity, eventData);
+            socket.emit(sensationName, identity, sensationData);
         });
     });
 
