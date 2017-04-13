@@ -1,6 +1,6 @@
 // PHASE 1: data input filtering and handling
-// PHASE 2: higher level event generators
-// PHASE 3: event callbacks    
+// PHASE 2: higher level sensation generators
+// PHASE 3: sensation callbacks    
 
 
 var log = console.log;
@@ -10,16 +10,6 @@ function isNode() {
     return (typeof module !== 'undefined' && module.exports);
 }
 
-
-// TODO: Enable defining HD_event_type
-
-// TODO: Enable receiving heteregeneous raw data and events from various sources with various protocols and connectivity types
-
-// TODO: Enable generating HD events based on the predefined HD_event_type s from the received raw data and events
-
-// TODO: Relay the generated HD event to subsribers
-
-// TODO: import connector based on the environment
 
 
 var HumanDataModel = function () {
