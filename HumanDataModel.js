@@ -70,9 +70,19 @@ var HumanDataModel = function () {
 
     // Starts the whole thing
     that.startHDmodel = function () {
-        log('Starting HD..');
+        log('Starting HDM');
         initializeHDmodel();
     };
+
+    that.addSeed = function (seed) {
+        log('Adding seed to HDM');
+        that.model.username = seed.username;
+        that.model.identity = seed.identity;
+        that.model.companionUUID = seed.companionUUID;
+        that.model.facebookID = seed.facebookID;
+        that.model.devices = seed.devices;
+    };
+
 
 
     // PHASE 1
@@ -482,11 +492,7 @@ if (isNode()) {
     log('Node.js');
 
     var setUser = bob;
-    hdModel.model.username = setUser.username;
-    hdModel.model.identity = setUser.identity;
-    hdModel.model.companionUUID = setUser.companionUUID;
-    hdModel.model.facebookID = setUser.facebookID;
-    hdModel.model.devices = setUser.devices;
+    hdModel.addSeed(bob);
 
     var NodeJSConnector = require('./connectors/nodeJSConnector.js');
     connector = new NodeJSConnector(hdModel);
@@ -510,11 +516,7 @@ if (isNode()) {
             return;
         }
 
-        hdModel.model.username = setUser.username;
-        hdModel.model.identity = setUser.identity;
-        hdModel.model.companionUUID = setUser.companionUUID;
-        hdModel.model.facebookID = setUser.facebookID;
-        hdModel.model.devices = setUser.devices;
+        hdModel.addSeed(setUser);
 
         requirejs(["connectors/connectorForJS", "libs/md5"], function (connector) {
             initializeConnector(hdModel);
