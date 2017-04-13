@@ -1,0 +1,9 @@
+{
+    "name": "Humand Data Model",
+    "description": "Human Data Model dependencies",
+    "version": "0.0.1",
+
+    "dependencies": {
+        "socket.io-client": "*"
+    }
+}
